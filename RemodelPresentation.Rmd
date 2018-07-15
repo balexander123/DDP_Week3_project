@@ -1,0 +1,70 @@
+---
+title: "SFResidentialBlockCompare"
+author: "Barry Alexander"
+date: "7/8/2018"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Compare Two Residential Housing Blocks within San Francisco, California
+
+Using public data, compare two adjacent residential housing blocks in San Francisco, California.
+
+```{r packages, echo=FALSE, results='hide', message=FALSE, warning=FALSE}
+if(!require(readr)) install.packages("readr",repos = "http://cran.us.r-project.org")
+if(!require(dplyr)) install.packages("dplyr",repos = "http://cran.us.r-project.org")
+if(!require(plotly)) install.packages("plotly",repos = "http://cran.us.r-project.org")
+
+library(readr)
+library(dplyr)
+library(plotly)
+```
+
+Data can be found here: https://data.sfgov.org/Housing-and-Buildings/Land-Use/us3s-fp9q
+
+Click the 'Export' button from the above link to download source data.
+
+```{r load}
+# LandUse2016.csv
+landUseRaw <- read_csv(file="LandUse2016.csv")
+```
+
+## Average square footage per lot for block 6588
+
+```{r square footage 6588}
+tidyBlock6588 <- landUseRaw %>%
+  filter(BLOCK_NUM == 6588) %>%
+  select(everything())
+
+avgSquareFootage6588 <- mean(tidyBlock6588$BLDGSQFT)
+print(paste0('Average square footage for block 6588: ',format(round(avgSquareFootage6588, 2), nsmall=2),' ft.'))
+
+```
+
+## Average square footage per lot for block 6583
+
+```{r square footage 6583}
+tidyBlock6583 <- landUseRaw %>%
+  filter(BLOCK_NUM == 6583) %>%
+  select(everything())
+
+avgSquareFootage6583 <- mean(tidyBlock6583$BLDGSQFT)
+print(paste0('Average square footage for block 6583: ',format(round(avgSquareFootage6583, 2), nsmall=2),' ft.'))
+
+```
+
+## Use plot.ly to compare histograms of square footage of the residential blocks
+
+```{r plot.ly histogram}
+p <- plot_ly(alpha = 0.6) %>%
+  add_histogram(x = tidyBlock6588$BLDGSQFT, name="Block 6588") %>%
+  add_histogram(x = tidyBlock6583$BLDGSQFT, name="Block 6583") %>%
+  layout(barmode = "overlay") %>%
+  add_segments(x=avgSquareFootage6588, y=0, xend=avgSquareFootage6588, yend=20, line=list(color="blue", width = 4), name="Mean sqft Block 6588") %>%
+  add_segments(x=avgSquareFootage6583, y=0, xend=avgSquareFootage6583, yend=20, line=list(color="orange", width = 4), name="Mean sqft Block 6583")
+p
+```
+generated on: `r as.character(format(Sys.Date(), format="%B %d, %Y"))`
